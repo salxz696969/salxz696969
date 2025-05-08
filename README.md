@@ -57,3 +57,6 @@
   <h2 align="center">🌟 Favorite Work</h2>
   
   <br/>
+  <p align="center">
+    👉 <a href="https://japanese-flash-card-five.vercel.app/" target="_blank"><strong>Visit my first deployed website</strong></a>
+  </p>
