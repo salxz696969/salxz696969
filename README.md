@@ -60,5 +60,10 @@
   <p align="center">
     👉 <a href="https://japanese-flash-card-five.vercel.app/" target="_blank"><strong>Japanese Vocabulary Learning Website</strong></a>
   </p>
-
-  <p>Credit to <a href="https://github.com/RaksaOC">RaksaOC</a> for styling</p>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+    <br/>
+  <p style="font-size:0.75rem">Credit to <a href="https://github.com/RaksaOC">RaksaOC</a> for the design</p>
