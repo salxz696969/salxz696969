@@ -58,5 +58,5 @@
   
   <br/>
   <p align="center">
-    👉 <a href="https://japanese-flash-card-five.vercel.app/" target="_blank"><strong>Visit my first deployed website</strong></a>
+    👉 <a href="https://japanese-flash-card-five.vercel.app/" target="_blank"><strong>Japanese Vocabulary Learning Website</strong></a>
   </p>
