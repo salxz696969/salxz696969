@@ -37,12 +37,12 @@
     <img src="https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=for-the-badge&logo=tailwindcss&logoColor=white"/>
   </p>
   
-  <h3 align="center">🖼️ Frontend Frameworks:</h3>
+  <h3 align="center">🖼️ Frontend Framework:</h3>
   <p align="center">
     <img src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB"/>
   </p>
   
-  <h3 align="center">🔗 Backend frameworks:</h3>
+  <h3 align="center">🔗 Backend Framework:</h3>
   <p align="center">
     <img src="https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=white"/>
   </p>
