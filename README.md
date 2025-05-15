@@ -67,6 +67,7 @@
   <br/>
   <p align="center">
     👉 <a href="https://japanese-flash-card-five.vercel.app/" target="_blank"><strong>Japanese Vocabulary Learning Website</strong></a>
+    👉 <a href="https://kanji-project.vercel.app/" target="_blank"><strong>Kanji Learning Website</strong></a>
   </p>
     <br/>
     <br/>
