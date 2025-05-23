@@ -44,7 +44,12 @@
   
   <h3 align="center">🔗 Backend Framework:</h3>
   <p align="center">
-    <img src="https://img.shields.io/badge/express.js-%23404d59.svg?style=for-the-badge&logo=express&logoColor=white"/>
+    <img src="https://img.shields.io/badge/expressjs-%23404d59.svg?style=for-the-badge&logo=express&logoColor=white"/>
+  </p>
+
+  <h3 align="center">📔 Full Stack Framework:</h3>
+  <p align="center">
+    <img src="https://img.shields.io/badge/Nextjs-%2320232a.svg?style=for-the-badge&logo=next.js&logoColor=white"/>
   </p>
   
   <h3 align="center">🛠️ Tools:</h3>
