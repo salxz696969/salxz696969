@@ -79,6 +79,8 @@
     👉 <a href="https://kanji-project.vercel.app/" target="_blank"><strong>Kanji Learning Website</strong></a>
   </p>
     <br/>
+    ![salxz696969's Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=salxz696969&theme=algolia&show_icons=true&hide_border=false&layout=compact)
+    <br/>
     <br/>
     <br/>
     <br/>
