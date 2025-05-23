@@ -61,7 +61,7 @@
   </p>
   <h3 align="center">🫧 Others:</h3>
   <p align="center">
-    <img src="https://img.shields.io/badge/firebase-0b5394.svg?style=for-the-badge&logo=postgresql&logoColor=white"/>
+    <img src="https://img.shields.io/badge/firebase-%23F05032.svg?style=for-the-badge&logo=firebase&logoColor=white"/>
   </p>
 
   <br/>
