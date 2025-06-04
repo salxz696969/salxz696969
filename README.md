@@ -76,8 +76,8 @@
   <br/>
   <p align="center">
     👉 <a href="https://japanese-flash-card-five.vercel.app/" target="_blank"><strong>Japanese Vocabulary Learning Website</strong></a><br/><br/>
-    👉 <a href="https://kanji-project.vercel.app/" target="_blank"><strong>Kanji Learning Website</strong></a>
-    👉 <a href="https://anki-clone-6kg4.vercel.app/" target="_blank"><strong>Kanji Learning Website</strong></a>
+    👉 <a href="https://kanji-project.vercel.app/" target="_blank"><strong>Kanji Learning Website</strong></a><br/>
+    👉 <a href="https://anki-clone-6kg4.vercel.app/" target="_blank"><strong>Anki Clone</strong></a>
   </p>
     <br/>
     <br/>
