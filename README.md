@@ -63,6 +63,7 @@
     <img src="https://img.shields.io/badge/POSTGRES-0b5394.svg?style=for-the-badge&logo=postgresql&logoColor=white"/>
     <img src="https://img.shields.io/badge/mongodb-3F3E42.svg?style=for-the-badge&logo=mongodb&logoColor=green"/>
     <img src="https://img.shields.io/badge/MYSQL-%23007ACC.svg?style=for-the-badge&logo=mysql&logoColor=white"/>
+    <img src="https://img.shields.io/badge/redis-%23007ACC.svg?style=for-the-badge&logo=redis&logoColor=white"/>
   </p>
   <h3 align="center">🫧 Others:</h3>
   <p align="center">
