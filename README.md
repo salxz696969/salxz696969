@@ -74,7 +74,8 @@
   <br/>
   <br/>
 
-  ![salxz696969's Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=salxz696969&theme=dark&show_icons=true&hide_border=false&layout=compact)
+  <div align="center">![salxz696969's Top Languages](https://github-readme-stats.vercel.app/api/top-langs/?username=salxz696969&theme=dark&show_icons=true&hide_border=false&layout=compact)
+  ![salxz696969's Streak](https://github-readme-streak-stats.herokuapp.com/?user=salxz696969&theme=dark&hide_border=false)<div/>
   
   <h2 align="center">🌟 Favorite Work</h2>
   
@@ -92,4 +93,5 @@
     <br/>
     <br/>
   <p style="font-size:0.75rem">Credit to <a href="https://github.com/RaksaOC">RaksaOC</a> for the design</p>
+
 
