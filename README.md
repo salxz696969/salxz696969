@@ -64,7 +64,7 @@
     <img src="https://img.shields.io/badge/mongodb-3F3E42.svg?style=for-the-badge&logo=mongodb&logoColor=green"/>
     <img src="https://img.shields.io/badge/MYSQL-%23007ACC.svg?style=for-the-badge&logo=mysql&logoColor=white"/>
     <img src="https://img.shields.io/badge/redis-%23DC382D.svg?style=for-the-badge&logo=redis&logoColor=white"/>
-
+    <img src="https://img.shields.io/badge/firestore-%23F05032.svg?style=for-the-badge&logo=firebase&logoColor=white"/>
   </p>
   <h3 align="center">🫧 Others:</h3>
   <p align="center">
@@ -75,8 +75,8 @@
   <br/>
 
 <div align="center">
-  <img style="margin-right:10px;" width="400" src="https://github-readme-stats.vercel.app/api/top-langs/?username=salxz696969&theme=dark&show_icons=true&hide_border=false&layout=compact" alt="Top Languages" />
-  <img width="400" style="margin-left:10px;" src="https://github-readme-streak-stats.herokuapp.com/?user=salxz696969&theme=dark&hide_border=false" alt="Streak" />
+  <img width="400" src="https://github-readme-stats.vercel.app/api/top-langs/?username=salxz696969&theme=dark&show_icons=true&hide_border=false&layout=compact" alt="Top Languages" /><br/><br/>
+  <img width="400" src="https://github-readme-streak-stats.herokuapp.com/?user=salxz696969&theme=dark&hide_border=false" alt="Streak" />
 </div>
   
   <h2 align="center">🌟 Favorite Work</h2>
@@ -95,6 +95,7 @@
     <br/>
     <br/>
   <p style="font-size:0.75rem">Credit to <a href="https://github.com/RaksaOC">RaksaOC</a> for the design</p>
+
 
 
 
