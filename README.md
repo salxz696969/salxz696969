@@ -76,7 +76,6 @@
 
 <div align="center">
   <img width="400" src="https://github-readme-stats.vercel.app/api/top-langs/?username=salxz696969&theme=react&show_icons=true&hide_border=false&layout=compact" alt="Top Languages" /><br/><br/>
-  <img width="400" src="https://streak-stats.demolab.com?user=salxz696969&theme=react" alt="GitHub Streak" />
 </div>
   <h2 align="center">🌟 Favorite Work</h2>
   
@@ -94,6 +93,7 @@
     <br/>
     <br/>
   <p style="font-size:0.75rem">Credit to <a href="https://github.com/RaksaOC">RaksaOC</a> for the design</p>
+
 
 
 
