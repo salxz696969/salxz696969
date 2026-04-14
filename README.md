@@ -39,10 +39,6 @@
     <img src="https://img.shields.io/badge/firestore-%23F05032.svg?style=for-the-badge&logo=firebase&logoColor=white"/>
     <img src="https://img.shields.io/badge/SQLite-3670A0.svg?style=for-the-badge&logo=SQLite&logoColor=white"/>
   </p>
-  <h3 align="center">🫧 BaaS:</h3>
-  <p align="center">
-    <img src="https://img.shields.io/badge/firebase-%2320232a.svg?style=for-the-badge&logo=firebase&logoColor=orange"/>
-
   <br/>
   <br/>
 
