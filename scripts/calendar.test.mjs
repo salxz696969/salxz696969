@@ -4,7 +4,7 @@ import { aggregateLogs } from './sync.mjs';
 import { calendarStart, iso, renderCalendar, validateCounts } from './calendar.mjs';
 import { renderLanguages } from './languages.mjs';
 import { combineCounts } from './github-commits.mjs';
-import { renderHoverCalendar, renderHoverAssets, replaceCalendarBlock, hoverAssetPaths } from './hover-calendar.mjs';
+import { renderHoverCalendar, renderHoverAssets, replaceCalendarBlock, hoverAssetPaths, dayTitle } from './hover-calendar.mjs';
 import { needsRefresh } from './refresh.mjs';
 
 const sha = n => String(n).padStart(40, '0');
@@ -59,12 +59,18 @@ test('README day images expose only dates and amounts through native hover title
   const data = { version: 1, through: '2026-11-12', days: { '2026-11-12': 23, '2026-11-11': 1 } };
   const html = renderHoverCalendar(data);
   assert.equal((html.match(/ title="/g) || []).length, 369);
-  assert.ok(html.includes('title="23 commits on November 12, 2026"'));
-  assert.ok(html.includes('title="1 commit on November 11, 2026"'));
-  assert.ok(!html.includes('November 13, 2026'));
+  assert.ok(html.includes('<span title="23 commits on November 12th.">'));
+  assert.ok(html.includes('<span title="1 commit on November 11th.">'));
+  assert.ok(html.includes('<span title="No commits on November 9th.">'));
+  assert.equal([...html.matchAll(/title="([^"]+)"/g)].at(-1)[1], 'No commits on November 7th.');
+  assert.equal(html.match(/November 13th/g)?.length, 1); // 2025 only, not the future 2026 day
   assert.ok(!/<script|onclick|style=/.test(html));
-  assert.equal((html.match(/<a href="#commit-calendar" title=/g) || []).length, 369);
-  assert.equal((html.match(/<img[^>]*title=/g) || []).length, 0);
+  // Hover only: no clickable links, and every image sits in <picture> so
+  // GitHub does not auto-link it to the raw SVG.
+  assert.ok(!/<a [^>]*href=/.test(html));
+  assert.equal((html.match(/<img /g) || []).length, (html.match(/<picture><img /g) || []).length);
+  assert.ok(html.includes('<td nowrap><kbd>'));
+  assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 31].map(d => dayTitle(0, new Date(Date.UTC(2026, 0, d))).split(' ')[4]), ['1st.', '2nd.', '3rd.', '4th.', '11th.', '12th.', '13th.', '21st.', '22nd.', '23rd.', '31st.']);
   const assets = renderHoverAssets(data);
   assert.deepEqual(Object.keys(assets).sort(), [...hoverAssetPaths].sort());
   assert.ok(Object.values(assets).every(svg => !svg.includes('undefined')));

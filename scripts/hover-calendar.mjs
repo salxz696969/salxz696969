@@ -17,7 +17,7 @@ export function renderHoverAssets(input) {
   const weeks = Math.ceil(((Date.parse(data.through) - start) / 86400000 + 1) / 7);
   const width = 30 + weeks * 13;
   const assets = {};
-  for (let level = 0; level < 5; level++) assets[`assets/calendar/day-${level}.svg`] = themedSvg(13, 13, `<rect x="0" y="1" width="10" height="10" rx="2" fill="var(--c${level})" stroke="var(--fg)" stroke-opacity=".05"/>`);
+  for (let level = 0; level < 5; level++) assets[`assets/calendar/day-${level}.svg`] = themedSvg(13, 13, `<rect x="0" y="0" width="10" height="10" rx="2" fill="var(--c${level})" stroke="var(--fg)" stroke-opacity=".05"/>`);
   assets['assets/calendar/blank.svg'] = themedSvg(13, 13, '');
   for (const day of ['mon', 'wed', 'fri']) assets[`assets/calendar/${day}.svg`] = themedSvg(30, 13, `<text y="10" fill="var(--fg)" font-size="12" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif">${day[0].toUpperCase() + day.slice(1)}</text>`);
   let lastMonth = -1;
@@ -46,13 +46,12 @@ export function renderHoverCalendar(input) {
   const width = 30 + weeks * 13;
   const values = Object.values(data.days).filter(n => n > 0).sort((a, b) => a - b);
   const thresholds = [0.25, 0.5, 0.75].map(q => values[Math.max(0, Math.ceil(values.length * q) - 1)] || 1);
-  const dateFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
-  // Put the native hover title on an HTML link, outside GitHub's themed-picture
-  // component. The link stays in this calendar; no project details are linked.
-  const image = (file, w, h, label = '', title = '') => {
-    const picture = `<picture><img src="./assets/calendar/${file}.svg" width="${w}" height="${h}" alt="${escapeXml(label)}"></picture>`;
-    return title ? `<a href="#commit-calendar" title="${escapeXml(title)}" aria-label="${escapeXml(title)}">${picture}</a>` : picture;
-  };
+  const monthFormat = new Intl.DateTimeFormat('en', { month: 'long', timeZone: 'UTC' });
+  // GitHub's README sanitizer drops <a> without href and wraps bare <img> in a
+  // link to the image, so: <picture> stops the auto-link, and a <span title>
+  // carries the native tooltip without making the day clickable. align="top"
+  // keeps each row exactly as tall as its images.
+  const image = (file, w, h, alt = '') => `<picture><img src="./assets/calendar/${file}.svg" width="${w}" height="${h}" align="top" alt="${escapeXml(alt)}"></picture>`;
   const rows = [image('months', width, 18, 'Months')];
   for (let day = 0; day < 7; day++) {
     const weekday = { 1: 'mon', 3: 'wed', 5: 'fri' }[day];
@@ -63,14 +62,24 @@ export function renderHoverCalendar(input) {
       const date = addDays(start, offset);
       const count = data.days[iso(date)] || 0;
       const level = count === 0 ? 0 : 1 + thresholds.filter(n => count > n).length;
-      const title = `${count} ${count === 1 ? 'commit' : 'commits'} on ${dateFormat.format(date)}`;
-      row += image(`day-${level}`, 13, 13, title, title);
+      row += `<span title="${escapeXml(dayTitle(count, date, monthFormat))}">${image(`day-${level}`, 13, 13)}</span>`;
     }
     rows.push(row);
   }
   rows.push(image('legend', width, 22, 'Less to more commits'));
   const total = Object.values(data.days).reduce((sum, n) => sum + n, 0).toLocaleString('en-US');
-  return `<!-- BEGIN COMMIT ACTIVITY -->\n<a name="commit-calendar"></a>\n<p>${total} commits in the last year</p>\n<table><tr><td nowrap><h6>\n${rows.join('<br>\n')}\n</h6></td></tr></table>\n<!-- END COMMIT ACTIVITY -->`;
+  // GitHub styles <kbd> with a 10px line height, so 13px day images sit 13px
+  // apart like the real contribution graph. The table cell's nowrap keeps rows
+  // intact on narrow screens; the table scrolls instead.
+  return `<!-- BEGIN COMMIT ACTIVITY -->\n<a name="commit-calendar"></a>\n<p>${total} commits in the last year</p>\n<table><tr><td nowrap><kbd>\n${rows.join('<br>\n')}\n</kbd></td></tr></table>\n<!-- END COMMIT ACTIVITY -->`;
+}
+
+const ordinal = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
+
+// Same wording as GitHub's own graph, e.g. "No commits on November 9th."
+export function dayTitle(count, date, monthFormat = new Intl.DateTimeFormat('en', { month: 'long', timeZone: 'UTC' })) {
+  const amount = count === 0 ? 'No commits' : `${count.toLocaleString('en-US')} ${count === 1 ? 'commit' : 'commits'}`;
+  return `${amount} on ${monthFormat.format(date)} ${ordinal(date.getUTCDate())}.`;
 }
 
 export function replaceCalendarBlock(readme, calendar) {
