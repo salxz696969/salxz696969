@@ -70,6 +70,7 @@ test('README day images expose only dates and amounts through native hover title
   assert.ok(!/<a [^>]*href=/.test(html));
   assert.equal((html.match(/<img /g) || []).length, (html.match(/<picture><img /g) || []).length);
   assert.ok(html.includes('<td nowrap><kbd>'));
+  assert.ok(html.includes('<p>24 commits in the last year (GitHub + GitLab)</p>'));
   assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 31].map(d => dayTitle(0, new Date(Date.UTC(2026, 0, d))).split(' ')[4]), ['1st.', '2nd.', '3rd.', '4th.', '11th.', '12th.', '13th.', '21st.', '22nd.', '23rd.', '31st.']);
   const assets = renderHoverAssets(data);
   assert.deepEqual(Object.keys(assets).sort(), [...hoverAssetPaths].sort());

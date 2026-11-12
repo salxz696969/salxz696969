@@ -71,7 +71,7 @@ export function renderHoverCalendar(input) {
   // GitHub styles <kbd> with a 10px line height, so 13px day images sit 13px
   // apart like the real contribution graph. The table cell's nowrap keeps rows
   // intact on narrow screens; the table scrolls instead.
-  return `<!-- BEGIN COMMIT ACTIVITY -->\n<a name="commit-calendar"></a>\n<p>${total} commits in the last year</p>\n<table><tr><td nowrap><kbd>\n${rows.join('<br>\n')}\n</kbd></td></tr></table>\n<!-- END COMMIT ACTIVITY -->`;
+  return `<!-- BEGIN COMMIT ACTIVITY -->\n<a name="commit-calendar"></a>\n<p>${total} commits in the last year (GitHub + GitLab)</p>\n<table><tr><td nowrap><kbd>\n${rows.join('<br>\n')}\n</kbd></td></tr></table>\n<!-- END COMMIT ACTIVITY -->`;
 }
 
 const ordinal = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');
