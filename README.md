@@ -1,11 +1,11 @@
 <p align="center">
     <img src="https://readme-typing-svg.herokuapp.com?font=Fira+Code&size=24&pause=1000&color=F7F7F7&center=true&vCenter=true&width=435&lines=Hello!+I'm+Sao-Visal.;Welcome+to+my+GitHub+profile." alt="Typing SVG" />
   </p>
-  
+
   <h2 align="center">💻 Tech Stacks</h2>
-  
+
   <br/>
-  
+
   <h3 align="center">🔠 Language:</h3>
   <p align="center">
     <img src="https://img.shields.io/badge/javascript-%23323330.svg?style=for-the-badge&logo=javascript&logoColor=%23F7DF1E"/>
@@ -18,7 +18,7 @@
     <img src="https://img.shields.io/badge/react-%2320232a.svg?style=for-the-badge&logo=react&logoColor=%2361DAFB"/>
     <img src="https://img.shields.io/badge/flutter-%23404d59.svg?style=for-the-badge&logo=flutter&logoColor=%2361DAFB"/>
   </p>
-  
+
   <h3 align="center">🔗 Backend Framework:</h3>
   <p align="center">
     <img src="https://img.shields.io/badge/express-%23404d59.svg?style=for-the-badge&logo=express&logoColor=white"/>
@@ -43,8 +43,20 @@
   <br/>
 
 <div align="center">
-  <img width="400" src="https://github-readme-stats.vercel.app/api/top-langs/?username=salxz696969&theme=react&show_icons=true&hide_border=false&layout=compact" alt="Top Languages" /><br/><br/>
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="./assets/top-languages-dark.svg" />
+    <source media="(prefers-color-scheme: light)" srcset="./assets/top-languages-light.svg" />
+    <img width="400" src="./assets/top-languages-light.svg" alt="Most used languages across my public GitHub repositories" />
+  </picture><br/><br/>
 </div>
+
+<!-- BEGIN COMMIT ACTIVITY -->
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="./assets/commits-dark.svg" />
+  <source media="(prefers-color-scheme: light)" srcset="./assets/commits-light.svg" />
+  <img width="755" src="./assets/commits-light.svg" alt="My commit calendar" />
+</picture>
+<!-- END COMMIT ACTIVITY -->
 
 
 
