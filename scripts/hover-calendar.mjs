@@ -47,9 +47,12 @@ export function renderHoverCalendar(input) {
   const values = Object.values(data.days).filter(n => n > 0).sort((a, b) => a - b);
   const thresholds = [0.25, 0.5, 0.75].map(q => values[Math.max(0, Math.ceil(values.length * q) - 1)] || 1);
   const dateFormat = new Intl.DateTimeFormat('en', { year: 'numeric', month: 'long', day: 'numeric', timeZone: 'UTC' });
-  // Picture prevents GitHub from turning every day into an image-viewer link.
-  // Native HTML title attributes survive README sanitization and provide hover.
-  const image = (file, w, h, label = '', title = '') => `<picture><img src="./assets/calendar/${file}.svg" width="${w}" height="${h}" alt="${escapeXml(label)}"${title ? ` title="${escapeXml(title)}"` : ''}></picture>`;
+  // Put the native hover title on an HTML link, outside GitHub's themed-picture
+  // component. The link stays in this calendar; no project details are linked.
+  const image = (file, w, h, label = '', title = '') => {
+    const picture = `<picture><img src="./assets/calendar/${file}.svg" width="${w}" height="${h}" alt="${escapeXml(label)}"></picture>`;
+    return title ? `<a href="#commit-calendar" title="${escapeXml(title)}" aria-label="${escapeXml(title)}">${picture}</a>` : picture;
+  };
   const rows = [image('months', width, 18, 'Months')];
   for (let day = 0; day < 7; day++) {
     const weekday = { 1: 'mon', 3: 'wed', 5: 'fri' }[day];
@@ -67,7 +70,7 @@ export function renderHoverCalendar(input) {
   }
   rows.push(image('legend', width, 22, 'Less to more commits'));
   const total = Object.values(data.days).reduce((sum, n) => sum + n, 0).toLocaleString('en-US');
-  return `<!-- BEGIN COMMIT ACTIVITY -->\n<p>${total} commits in the last year</p>\n<table><tr><td nowrap><h6>\n${rows.join('<br>\n')}\n</h6></td></tr></table>\n<!-- END COMMIT ACTIVITY -->`;
+  return `<!-- BEGIN COMMIT ACTIVITY -->\n<a name="commit-calendar"></a>\n<p>${total} commits in the last year</p>\n<table><tr><td nowrap><h6>\n${rows.join('<br>\n')}\n</h6></td></tr></table>\n<!-- END COMMIT ACTIVITY -->`;
 }
 
 export function replaceCalendarBlock(readme, calendar) {

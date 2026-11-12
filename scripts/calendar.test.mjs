@@ -62,7 +62,9 @@ test('README day images expose only dates and amounts through native hover title
   assert.ok(html.includes('title="23 commits on November 12, 2026"'));
   assert.ok(html.includes('title="1 commit on November 11, 2026"'));
   assert.ok(!html.includes('November 13, 2026'));
-  assert.ok(!/<script|<a\s|onclick|style=/.test(html));
+  assert.ok(!/<script|onclick|style=/.test(html));
+  assert.equal((html.match(/<a href="#commit-calendar" title=/g) || []).length, 369);
+  assert.equal((html.match(/<img[^>]*title=/g) || []).length, 0);
   const assets = renderHoverAssets(data);
   assert.deepEqual(Object.keys(assets).sort(), [...hoverAssetPaths].sort());
   assert.ok(Object.values(assets).every(svg => !svg.includes('undefined')));
