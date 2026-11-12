@@ -1,77 +1,125 @@
+import { readFileSync } from 'node:fs';
 import { themes, escapeXml, calendarStart, addDays, iso, validateCounts } from './calendar.mjs';
 
+// Geometry copied from GitHub's own contribution graph (measured on the
+// profile page): a 1px rounded box, 10px cells on a 13px pitch, labels in
+// Mona Sans 12px, the legend's squares on a 14px pitch.
+const PITCH = 13;
+const LEFT = 46; // box edge to the first column
+const RIGHT = 12; // last column to the box edge
+const TOP = 35; // box edge to the first row
+const BOTTOM = 35; // last row to the box edge
+const HEADING = 32; // 24px heading line + 8px gap above the box
+const MAX_MONTHS = 14;
+
+const fontData = name => readFileSync(new URL(`../assets/fonts/${name}`, import.meta.url)).toString('base64');
+let fonts;
+const fontFace = kind => {
+  fonts ||= { label: fontData('mona-sans-label.woff2'), heading: fontData('mona-sans-heading.woff2') };
+  return `@font-face{font-family:M;src:url(data:font/woff2;base64,${fonts[kind]}) format("woff2")}text{font-family:M,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans",Helvetica,Arial,sans-serif}`;
+};
+
+const cellBorder = { light: 'rgba(31,35,40,.05)', dark: 'rgba(1,4,9,.05)' };
+const vars = theme => `--fg:${themes[theme].foreground};--muted:${themes[theme].muted};--border:${themes[theme].border};--cell-border:${cellBorder[theme]};${themes[theme].cells.map((c, i) => `--c${i}:${c}`).join(';')}`;
+
+function svg(width, height, content, font) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><style>:root{${vars('light')}}@media(prefers-color-scheme:dark){:root{${vars('dark')}}}${font ? fontFace(font) : ''}</style>${content}</svg>\n`;
+}
+
+const cell = (x, y, level) => `<rect x="${x}" y="${y}" width="10" height="10" rx="2" fill="var(--c${level})"/><rect x="${x + 0.5}" y="${y + 0.5}" width="9" height="9" rx="1.5" fill="none" stroke="var(--cell-border)"/>`;
+const line = d => `<path d="${d}" fill="none" stroke="var(--border)"/>`;
+const label = (x, y, text, color = 'fg') => `<text x="${x}" y="${y}" fill="var(--${color})" font-size="12">${escapeXml(text)}</text>`;
+
+const file = name => `assets/calendar/${name}.svg`;
 export const hoverAssetPaths = [
-  ...Array.from({ length: 5 }, (_, level) => `assets/calendar/day-${level}.svg`),
-  'assets/calendar/blank.svg',
-  'assets/calendar/mon.svg', 'assets/calendar/wed.svg', 'assets/calendar/fri.svg',
-  'assets/calendar/months.svg', 'assets/calendar/legend.svg',
+  ...[0, 1, 2, 3, 4].map(level => file(`day-${level}`)), file('blank'), file('heading'),
+  file('top-left'), file('top-right'), ...Array.from({ length: MAX_MONTHS }, (_, i) => file(`month-${i}`)),
+  file('row-left'), file('row-left-mon'), file('row-left-wed'), file('row-left-fri'), file('row-right'),
+  file('bottom-left'), file('bottom'), file('legend'), file('bottom-right'),
 ];
 
-function themedSvg(width, height, content, extraStyles = '') {
-  return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}"><style>:root{--fg:${themes.light.foreground};--muted:${themes.light.muted};${themes.light.cells.map((c, i) => `--c${i}:${c}`).join(';')}}@media(prefers-color-scheme:dark){:root{--fg:${themes.dark.foreground};--muted:${themes.dark.muted};${themes.dark.cells.map((c, i) => `--c${i}:${c}`).join(';')}}}${extraStyles}</style>${content}</svg>\n`;
-}
-
-export function renderHoverAssets(input) {
-  const data = validateCounts(input);
-  const start = calendarStart(data.through);
-  const weeks = Math.ceil(((Date.parse(data.through) - start) / 86400000 + 1) / 7);
-  const width = 30 + weeks * 13;
-  const assets = {};
-  for (let level = 0; level < 5; level++) assets[`assets/calendar/day-${level}.svg`] = themedSvg(13, 13, `<rect x="0" y="0" width="10" height="10" rx="2" fill="var(--c${level})" stroke="var(--fg)" stroke-opacity=".05"/>`);
-  assets['assets/calendar/blank.svg'] = themedSvg(13, 13, '');
-  for (const day of ['mon', 'wed', 'fri']) assets[`assets/calendar/${day}.svg`] = themedSvg(30, 13, `<text y="10" fill="var(--fg)" font-size="12" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif">${day[0].toUpperCase() + day.slice(1)}</text>`);
-  let lastMonth = -1;
-  const months = [];
-  const monthFormat = new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' });
-  for (let week = 0; week < weeks; week++) {
-    const date = addDays(start, week * 7);
-    if (date.getUTCMonth() !== lastMonth && week < weeks - 1) {
-      months.push(`<text x="${30 + week * 13}" y="12">${monthFormat.format(date)}</text>`);
-      lastMonth = date.getUTCMonth();
-    }
-  }
-  assets['assets/calendar/months.svg'] = themedSvg(width, 18, `<g fill="var(--fg)" font-size="12" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif">${months.join('')}</g>`);
-  const legend = [`<text x="${width - 139}" y="15">Less</text>`];
-  for (let i = 0; i < 5; i++) legend.push(`<rect x="${width - 108 + i * 13}" y="6" width="10" height="10" rx="2" fill="var(--c${i})"/>`);
-  legend.push(`<text x="${width - 38}" y="15">More</text>`);
-  assets['assets/calendar/legend.svg'] = themedSvg(width, 22, `<g fill="var(--muted)" font-size="12" font-family="-apple-system,BlinkMacSystemFont,Segoe UI,Arial,sans-serif">${legend.join('')}</g>`);
-  return assets;
-}
-
-export function renderHoverCalendar(input) {
+function layout(input) {
   const data = validateCounts(input);
   const start = calendarStart(data.through);
   const days = Math.round((Date.parse(data.through) - start) / 86400000) + 1;
   const weeks = Math.ceil(days / 7);
-  const width = 30 + weeks * 13;
   const values = Object.values(data.days).filter(n => n > 0).sort((a, b) => a - b);
   const thresholds = [0.25, 0.5, 0.75].map(q => values[Math.max(0, Math.ceil(values.length * q) - 1)] || 1);
-  const monthFormat = new Intl.DateTimeFormat('en', { month: 'long', timeZone: 'UTC' });
+  // Like GitHub: a month owns the weeks whose Sunday falls in it, and its
+  // label shows only when it spans at least two weeks.
+  const monthFormat = new Intl.DateTimeFormat('en', { month: 'short', timeZone: 'UTC' });
+  const months = [];
+  for (let week = 0; week < weeks; week++) {
+    const month = addDays(start, week * 7).getUTCMonth();
+    if (months.at(-1)?.month === month) months.at(-1).span++;
+    else months.push({ month, span: 1, name: monthFormat.format(addDays(start, week * 7)) });
+  }
+  if (months.length > MAX_MONTHS) throw new Error('Too many month segments');
+  const total = Object.values(data.days).reduce((sum, n) => sum + n, 0);
+  return { data, start, days, weeks, thresholds, months, legendWeeks: 12, heading: `${total.toLocaleString('en-US')} commits in the last year (GitHub + GitLab)` };
+}
+
+export function renderHoverAssets(input) {
+  const { weeks, months, legendWeeks, heading } = layout(input);
+  const width = LEFT + weeks * PITCH + RIGHT;
+  const assets = {};
+  for (let level = 0; level < 5; level++) assets[file(`day-${level}`)] = svg(PITCH, PITCH, cell(0, 0, level));
+  assets[file('blank')] = svg(PITCH, PITCH, '');
+  assets[file('heading')] = svg(headingWidth(heading, width), HEADING, `<text x="0" y="18" fill="var(--fg)" font-size="16">${escapeXml(heading)}</text>`, 'heading');
+  // Box top: rounded corners, then month labels whose baseline sits 30px down.
+  assets[file('top-left')] = svg(LEFT, TOP, line(`M.5 ${TOP}V6A5.5 5.5 0 0 1 6 .5H${LEFT}`));
+  assets[file('top-right')] = svg(RIGHT, TOP, line(`M0 .5H6A5.5 5.5 0 0 1 11.5 6V${TOP}`));
+  for (let i = 0; i < MAX_MONTHS; i++) {
+    const segment = months[i];
+    const w = (segment?.span || 1) * PITCH;
+    assets[file(`month-${i}`)] = svg(w, TOP, line(`M0 .5H${w}`) + (segment && segment.span >= 2 ? label(0, 30, segment.name) : ''), segment?.span >= 2 ? 'label' : undefined);
+  }
+  // Day rows: Mon/Wed/Fri labels 15px from the edge, baseline 9px below the cell top.
+  assets[file('row-left')] = svg(LEFT, PITCH, line(`M.5 0V${PITCH}`));
+  for (const day of ['Mon', 'Wed', 'Fri']) assets[file(`row-left-${day.toLowerCase()}`)] = svg(LEFT, PITCH, line(`M.5 0V${PITCH}`) + label(15, 9, day), 'label');
+  assets[file('row-right')] = svg(RIGHT, PITCH, line(`M11.5 0V${PITCH}`));
+  // Box bottom: legend squares 8px below the last row, on a 14px pitch.
+  assets[file('bottom-left')] = svg(LEFT, BOTTOM, line(`M.5 0V29A5.5 5.5 0 0 0 6 34.5H${LEFT}`));
+  assets[file('bottom')] = svg(PITCH, BOTTOM, line(`M0 34.5H${PITCH}`));
+  const legendWidth = legendWeeks * PITCH;
+  const squares = [0, 1, 2, 3, 4].map(level => cell(29 + level * 14, 8, level)).join('');
+  assets[file('legend')] = svg(legendWidth, BOTTOM, line(`M0 34.5H${legendWidth}`) + label(2.7, 18, 'Less', 'muted') + squares + label(98.7, 18, 'More', 'muted'), 'label');
+  assets[file('bottom-right')] = svg(RIGHT, BOTTOM, line(`M0 34.5H6A5.5 5.5 0 0 0 11.5 29V0`));
+  return assets;
+}
+
+// Generous estimate of Mona Sans 16px text width, so the heading never clips.
+const headingWidth = (text, max) => Math.min(max, Math.ceil(text.length * 8.5) + 8);
+
+export function renderHoverCalendar(input) {
+  const { data, start, days, weeks, thresholds, months, legendWeeks, heading } = layout(input);
+  const width = LEFT + weeks * PITCH + RIGHT;
+  const dayFormat = new Intl.DateTimeFormat('en', { month: 'long', timeZone: 'UTC' });
   // GitHub's README sanitizer drops <a> without href and wraps bare <img> in a
-  // link to the image, so: <picture> stops the auto-link, and a <span title>
-  // carries the native tooltip without making the day clickable. align="top"
-  // keeps each row exactly as tall as its images.
-  const image = (file, w, h, alt = '') => `<picture><img src="./assets/calendar/${file}.svg" width="${w}" height="${h}" align="top" alt="${escapeXml(alt)}"></picture>`;
-  const rows = [image('months', width, 18, 'Months')];
+  // link to the image, so <picture> stops the auto-link and a <span title>
+  // carries the native tooltip without making the day clickable.
+  const image = (name, w, h, alt = '') => `<picture><img src="./${file(name)}" width="${w}" height="${h}" align="top" alt="${escapeXml(alt)}"></picture>`;
+  // Word joiners stop rows from wrapping on narrow screens.
+  const join = parts => parts.join('&#8288;');
+  const lines = [image('heading', headingWidth(heading, width), HEADING, heading)];
+  lines.push(join([image('top-left', LEFT, TOP), ...months.map((m, i) => image(`month-${i}`, m.span * PITCH, TOP)), image('top-right', RIGHT, TOP)]));
   for (let day = 0; day < 7; day++) {
-    const weekday = { 1: 'mon', 3: 'wed', 5: 'fri' }[day];
-    let row = image(weekday || 'blank', 30, 13, weekday || '');
+    const parts = [image({ 1: 'row-left-mon', 3: 'row-left-wed', 5: 'row-left-fri' }[day] || 'row-left', LEFT, PITCH)];
     for (let week = 0; week < weeks; week++) {
       const offset = week * 7 + day;
-      if (offset >= days) { row += image('blank', 13, 13); continue; }
+      if (offset >= days) { parts.push(image('blank', PITCH, PITCH)); continue; }
       const date = addDays(start, offset);
       const count = data.days[iso(date)] || 0;
       const level = count === 0 ? 0 : 1 + thresholds.filter(n => count > n).length;
-      row += `<span title="${escapeXml(dayTitle(count, date, monthFormat))}">${image(`day-${level}`, 13, 13)}</span>`;
+      parts.push(`<span title="${escapeXml(dayTitle(count, date, dayFormat))}">${image(`day-${level}`, PITCH, PITCH)}</span>`);
     }
-    rows.push(row);
+    parts.push(image('row-right', RIGHT, PITCH));
+    lines.push(join(parts));
   }
-  rows.push(image('legend', width, 22, 'Less to more commits'));
-  const total = Object.values(data.days).reduce((sum, n) => sum + n, 0).toLocaleString('en-US');
-  // GitHub styles <kbd> with a 10px line height, so 13px day images sit 13px
-  // apart like the real contribution graph. The table cell's nowrap keeps rows
-  // intact on narrow screens; the table scrolls instead.
-  return `<!-- BEGIN COMMIT ACTIVITY -->\n<a name="commit-calendar"></a>\n<p>${total} commits in the last year (GitHub + GitLab)</p>\n<table><tr><td nowrap><kbd>\n${rows.join('<br>\n')}\n</kbd></td></tr></table>\n<!-- END COMMIT ACTIVITY -->`;
+  lines.push(join([image('bottom-left', LEFT, BOTTOM), ...Array.from({ length: weeks - legendWeeks }, () => image('bottom', PITCH, BOTTOM)), image('legend', legendWeeks * PITCH, BOTTOM, 'Less to more commits'), image('bottom-right', RIGHT, BOTTOM)]));
+  // <sub> sets line-height: 0 in GitHub's stylesheet; the inner <div> inherits
+  // it, so every line is exactly as tall as its images and rows sit 13px apart.
+  return `<!-- BEGIN COMMIT ACTIVITY -->\n<div><sub><div><a name="commit-calendar"></a>\n${lines.join('<br>\n')}\n</div></sub></div>\n<!-- END COMMIT ACTIVITY -->`;
 }
 
 const ordinal = n => n + (n % 100 >= 11 && n % 100 <= 13 ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th');

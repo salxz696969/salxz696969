@@ -69,12 +69,23 @@ test('README day images expose only dates and amounts through native hover title
   // GitHub does not auto-link it to the raw SVG.
   assert.ok(!/<a [^>]*href=/.test(html));
   assert.equal((html.match(/<img /g) || []).length, (html.match(/<picture><img /g) || []).length);
-  assert.ok(html.includes('<td nowrap><kbd>'));
-  assert.ok(html.includes('<p>24 commits in the last year (GitHub + GitLab)</p>'));
+  assert.ok(html.includes('<div><sub><div>'));
+  assert.ok(html.includes('alt="24 commits in the last year (GitHub + GitLab)"'));
   assert.deepEqual([1, 2, 3, 4, 11, 12, 13, 21, 22, 23, 31].map(d => dayTitle(0, new Date(Date.UTC(2026, 0, d))).split(' ')[4]), ['1st.', '2nd.', '3rd.', '4th.', '11th.', '12th.', '13th.', '21st.', '22nd.', '23rd.', '31st.']);
+  // Every line spans the same width (GitHub's 747px box for 53 weeks), so the
+  // drawn border lines up; rows are joined so they never wrap.
+  const lines = html.split('<br>\n').slice(1);
+  assert.equal(lines.length, 9);
+  for (const l of lines) assert.equal([...l.matchAll(/width="(\d+)"/g)].reduce((s, m) => s + Number(m[1]), 0), 747);
+  assert.ok(lines.every(l => !/><picture|><span/.test(l.replace(/<span title="[^"]*"><picture>/g, '<picture>'))));
   const assets = renderHoverAssets(data);
   assert.deepEqual(Object.keys(assets).sort(), [...hoverAssetPaths].sort());
-  assert.ok(Object.values(assets).every(svg => !svg.includes('undefined')));
+  assert.ok(Object.values(assets).every(svg => !svg.includes('undefined') && !svg.includes('NaN')));
+  assert.match(assets['assets/calendar/heading.svg'], />24 commits in the last year \(GitHub \+ GitLab\)</);
+  assert.match(assets['assets/calendar/month-0.svg'], />Nov</);
+  assert.match(assets['assets/calendar/month-12.svg'], />Nov</); // final two weeks, as on GitHub
+  assert.ok(!assets['assets/calendar/month-13.svg'].includes('<text'));
+  assert.ok(!assets['assets/calendar/row-left.svg'].includes('font-face'));
 });
 
 test('refresh replaces only its marked README block and refuses missing/duplicate markers', () => {
