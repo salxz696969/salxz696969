@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { calendarStart, iso, renderCalendar, validateCounts } from './calendar.mjs';
 import { collectLanguages, renderLanguages } from './languages.mjs';
 import { collectGithubCommits, combineCounts } from './github-commits.mjs';
+import { hoverAssetPaths, renderHoverAssets, renderHoverCalendar, replaceCalendarBlock } from './hover-calendar.mjs';
 
 const root = resolve(fileURLToPath(new URL('..', import.meta.url)));
 const run = (command, args, options = {}) => execFileSync(command, args, { encoding: 'utf8', windowsHide: true, timeout: 60000, maxBuffer: 64 * 1024 * 1024, ...options });
@@ -30,7 +31,7 @@ export function aggregateLogs(logs, emails, through) {
 
 // A strict output whitelist is also used for publishing. Never add source paths,
 // author identities, commit hashes/messages, credentials, or raw git logs here.
-const publishPaths = ['data/daily-commits.json', 'assets/commits-light.svg', 'assets/commits-dark.svg', 'assets/top-languages-light.svg', 'assets/top-languages-dark.svg'];
+const publishPaths = ['data/daily-commits.json', 'assets/commits-light.svg', 'assets/commits-dark.svg', 'assets/top-languages-light.svg', 'assets/top-languages-dark.svg', ...hoverAssetPaths, 'README.md'];
 
 export function publish(config, files) {
   const api = args => JSON.parse(run('gh', ['api', ...args]));
@@ -50,7 +51,8 @@ export function publish(config, files) {
     } catch (error) {
       if (!String(error.stderr).includes('404')) throw error;
     }
-    if (oldContent !== files[path]) changes.push({ path, contents: Buffer.from(files[path]).toString('base64') });
+    const content = path === 'README.md' ? replaceCalendarBlock(oldContent || '', files[path]) : files[path];
+    if (oldContent !== content) changes.push({ path, contents: Buffer.from(content).toString('base64') });
   }
   if (!changes.length) { console.log('Profile cards are already current.'); return; }
   const query = 'mutation($input:CreateCommitOnBranchInput!){createCommitOnBranch(input:$input){commit{url}}}';
@@ -79,6 +81,8 @@ export function main(args = process.argv.slice(2)) {
   const githubCounts = collectGithubCommits(config.githubRepository.split('/')[0], through);
   const counts = validateCounts(combineCounts(aggregateLogs(logs, config.emails, through), githubCounts));
   const files = { 'data/daily-commits.json': JSON.stringify(counts, null, 2) + '\n' };
+  Object.assign(files, renderHoverAssets(counts));
+  files['README.md'] = renderHoverCalendar(counts);
   for (const theme of ['light', 'dark']) files[`assets/commits-${theme}.svg`] = renderCalendar(counts, theme);
   const cachePath = resolve(configPath, '..', 'public-languages-cache.json');
   let cache;
@@ -91,7 +95,7 @@ export function main(args = process.argv.slice(2)) {
   if (!args.includes('--publish')) {
     for (const [path, content] of Object.entries(files)) {
       mkdirSync(resolve(root, path, '..'), { recursive: true });
-      writeFileSync(resolve(root, path), content);
+      writeFileSync(resolve(root, path), path === 'README.md' ? replaceCalendarBlock(readFileSync(resolve(root, path), 'utf8'), content) : content);
     }
   }
   console.log(`Prepared ${Object.values(counts.days).reduce((a, b) => a + b, 0)} commits across ${Object.keys(counts.days).length} active days through ${through}.`);

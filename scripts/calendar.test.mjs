@@ -4,6 +4,7 @@ import { aggregateLogs } from './sync.mjs';
 import { calendarStart, iso, renderCalendar, validateCounts } from './calendar.mjs';
 import { renderLanguages } from './languages.mjs';
 import { combineCounts } from './github-commits.mjs';
+import { renderHoverCalendar, renderHoverAssets, replaceCalendarBlock, hoverAssetPaths } from './hover-calendar.mjs';
 
 const sha = n => String(n).padStart(40, '0');
 const line = (n, email, date) => `${sha(n)}\t${email}\t${date}\n`;
@@ -51,4 +52,25 @@ test('combines GitHub and GitLab daily counts without retaining source details',
   assert.match(svg, /9 commits in the last year/);
   assert.ok(!svg.includes('GitLab'));
   assert.ok(!svg.includes('GitHub'));
+});
+
+test('README day images expose only dates and amounts through native hover titles', () => {
+  const data = { version: 1, through: '2026-11-12', days: { '2026-11-12': 23, '2026-11-11': 1 } };
+  const html = renderHoverCalendar(data);
+  assert.equal((html.match(/ title="/g) || []).length, 369);
+  assert.ok(html.includes('title="23 commits on November 12, 2026"'));
+  assert.ok(html.includes('title="1 commit on November 11, 2026"'));
+  assert.ok(!html.includes('November 13, 2026'));
+  assert.ok(!/<script|<a\s|onclick|style=/.test(html));
+  const assets = renderHoverAssets(data);
+  assert.deepEqual(Object.keys(assets).sort(), [...hoverAssetPaths].sort());
+  assert.ok(Object.values(assets).every(svg => !svg.includes('undefined')));
+});
+
+test('refresh replaces only its marked README block and refuses missing/duplicate markers', () => {
+  const block = '<!-- BEGIN COMMIT ACTIVITY -->old<!-- END COMMIT ACTIVITY -->';
+  const replacement = '<!-- BEGIN COMMIT ACTIVITY -->new<!-- END COMMIT ACTIVITY -->';
+  assert.equal(replaceCalendarBlock(`before\n${block}\nafter`, replacement), `before\n${replacement}\nafter`);
+  assert.throws(() => replaceCalendarBlock('unmarked README', replacement));
+  assert.throws(() => replaceCalendarBlock(block + block, replacement));
 });
