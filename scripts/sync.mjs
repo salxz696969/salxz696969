@@ -39,6 +39,15 @@ export function publish(config, files) {
   const branch = config.githubBranch;
   if (!/^[\w.-]+\/[\w.-]+$/.test(target) || !/^[\w./-]+$/.test(branch)) throw new Error('Invalid GitHub destination');
   const [owner, name] = target.split('/');
+  if (config.onlyWhenCountsChange) {
+    const current = api([`repos/${target}/contents/data/daily-commits.json?ref=${encodeURIComponent(branch)}`]);
+    const previous = validateCounts(JSON.parse(Buffer.from(current.content, 'base64').toString('utf8')));
+    const next = validateCounts(JSON.parse(files['data/daily-commits.json']));
+    if (JSON.stringify(previous.days) === JSON.stringify(next.days)) {
+      console.log('Commit amounts are unchanged; no profile update needed.');
+      return;
+    }
+  }
   // Read the expected head first. Concurrent changes make the atomic mutation
   // fail rather than overwrite somebody else's README or code.
   const expectedHeadOid = api([`repos/${target}/git/ref/heads/${branch}`]).object.sha;
@@ -74,11 +83,11 @@ export function main(args = process.argv.slice(2)) {
   const logs = config.repositories.map(repo => {
     if (run('git', ['-C', repo, 'rev-parse', '--is-shallow-repository']).trim() !== 'false') throw new Error('Complete history is required');
     if (!args.includes('--no-fetch')) run('git', ['-C', repo, 'fetch', '--quiet', 'origin']);
-    // Only remote-tracking refs: unpushed local work never counts. No code,
-    // filenames, commit messages, or diffs are requested from Git.
-    return run('git', ['-C', repo, 'log', '--remotes=origin', '--format=%H%x09%ae%x09%aI']);
+    // Only author/hash/date metadata is read. Local branches may be included
+    // so new commits are counted before the developer pushes them.
+    return run('git', ['-C', repo, 'log', ...(config.includeLocalCommits ? ['--branches'] : []), '--remotes=origin', '--format=%H%x09%ae%x09%aI']);
   });
-  const githubCounts = collectGithubCommits(config.githubRepository.split('/')[0], through);
+  const githubCounts = collectGithubCommits(config.githubRepository.split('/')[0], through, config.githubRepository);
   const counts = validateCounts(combineCounts(aggregateLogs(logs, config.emails, through), githubCounts));
   const files = { 'data/daily-commits.json': JSON.stringify(counts, null, 2) + '\n' };
   Object.assign(files, renderHoverAssets(counts));

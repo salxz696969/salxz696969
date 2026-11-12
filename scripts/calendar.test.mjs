@@ -5,6 +5,7 @@ import { calendarStart, iso, renderCalendar, validateCounts } from './calendar.m
 import { renderLanguages } from './languages.mjs';
 import { combineCounts } from './github-commits.mjs';
 import { renderHoverCalendar, renderHoverAssets, replaceCalendarBlock, hoverAssetPaths } from './hover-calendar.mjs';
+import { needsRefresh } from './refresh.mjs';
 
 const sha = n => String(n).padStart(40, '0');
 const line = (n, email, date) => `${sha(n)}\t${email}\t${date}\n`;
@@ -73,4 +74,11 @@ test('refresh replaces only its marked README block and refuses missing/duplicat
   assert.equal(replaceCalendarBlock(`before\n${block}\nafter`, replacement), `before\n${replacement}\nafter`);
   assert.throws(() => replaceCalendarBlock('unmarked README', replacement));
   assert.throws(() => replaceCalendarBlock(block + block, replacement));
+});
+
+test('background checks skip unchanged history and retry periodically for GitHub activity', () => {
+  assert.equal(needsRefresh(null, 'a', 1), true);
+  assert.equal(needsRefresh({ signature: 'a', checkedAt: 0 }, 'a', 1000), false);
+  assert.equal(needsRefresh({ signature: 'a', checkedAt: 0 }, 'b', 1000), true);
+  assert.equal(needsRefresh({ signature: 'a', checkedAt: 0 }, 'a', 21600000), true);
 });
